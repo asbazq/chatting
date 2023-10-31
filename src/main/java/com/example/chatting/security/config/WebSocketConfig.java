@@ -6,6 +6,8 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 import com.example.chatting.handler.WebSocketHandler;
+import com.example.chatting.service.ChatService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSocket // WebSocket을 활성화하고 WebSocketHandler를 등록
 public class WebSocketConfig implements WebSocketConfigurer {
+    private final ObjectMapper objectMapper;
+    private final ChatService chatService;
 
     // @Bean
     // public WebSocketHandler signalingHandler() {
@@ -25,7 +29,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new WebSocketHandler(), "/ws/chat") // webSocket server endPoint 설정
+        registry.addHandler(new WebSocketHandler(objectMapper, chatService), "/ws/chat") // webSocket server endPoint 설정
                 .setAllowedOriginPatterns("*"); // cors 전체 허용
                 // .withSockJS(); // webSocket을 지원하지 않는 경우, SockJS 사용 설정
     }

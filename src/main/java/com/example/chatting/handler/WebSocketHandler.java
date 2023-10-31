@@ -3,12 +3,26 @@ package com.example.chatting.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.example.chatting.dto.ChatMessageDto;
+import com.example.chatting.dto.ChatRoomDto;
+import com.example.chatting.service.ChatService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@RequiredArgsConstructor
+@Component
+@Slf4j
 public class WebSocketHandler extends TextWebSocketHandler { // 필요에 따라 Text, BinaryWebSocketHandler 상속하여 사용
+    private final ObjectMapper objectMapper;
+    private final ChatService chatService;
     // 현재 연결중인 모든 클라이언트
     private List<WebSocketSession> sessionList = new ArrayList<>();
     // WebSocketSession 은 WebSocket 이 연결될 때 생기는 연결정보를 담고있는 객체 
@@ -44,11 +58,15 @@ public class WebSocketHandler extends TextWebSocketHandler { // 필요에 따라
         String receivedMessage = message.getPayload();
 
         // 받은 메시지를 다른 연결된 클라이언트에게 브로드캐스트
-        for (WebSocketSession client : sessionList) {
-            if (client != session) {
-                client.sendMessage(new TextMessage(sender + " : " + receivedMessage));
-            }
-        }
+        // for (WebSocketSession client : sessionList) {
+        //     if (client != session) {
+        //         client.sendMessage(new TextMessage(sender + " : " + receivedMessage));
+        //     }
+        // }
+
+        ChatMessageDto chatMessageDto = objectMapper.readValue(receivedMessage, ChatMessageDto.class);
+        ChatRoomDto chatRoomDto = chatService.findRoomId(chatMessageDto.getRoomId());
+        chatRoomDto.handleActions(session, chatMessageDto, chatService);
     }
 
     
