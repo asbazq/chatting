@@ -66,7 +66,7 @@ public class WebSocketHandler extends TextWebSocketHandler { // 필요에 따라
 
         ChatMessageDto chatMessageDto = objectMapper.readValue(receivedMessage, ChatMessageDto.class);
         ChatRoomDto chatRoomDto = chatService.findRoomId(chatMessageDto.getRoomId());
-        chatRoomDto.handleActions(session, chatMessageDto, chatService);
+        chatService.handleActions(chatRoomDto, session, chatMessageDto);
     }
 
     

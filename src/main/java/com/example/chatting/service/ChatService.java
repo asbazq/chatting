@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.example.chatting.dto.ChatMessageDto;
 import com.example.chatting.dto.ChatRoomDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,7 +52,18 @@ public class ChatService {
         chatRooms.put(randomId, chatRoomDto);
         return chatRoomDto;
     }
+    public void handleActions(ChatRoomDto chatRoomDto, WebSocketSession session, ChatMessageDto chatMessageDto) {
+        if (chatMessageDto.getType().equals(ChatMessageDto.MessageType.ENTER)) {
+            chatRoomDto.getSessions().add(session);
+            chatMessageDto.setMessage(chatMessageDto.getSender() + "님이 입장했습니다.");
+        }
+        sendMessageToAll(chatMessageDto, chatRoomDto);
+    }
 
+    public <T> void sendMessageToAll(T message, ChatRoomDto chatRoomDto) {
+        chatRoomDto.getSessions().parallelStream().forEach(session -> sendMessage(session, message));
+    }
+    
     public <T> void sendMessage(WebSocketSession session, T message) {
         try {
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));

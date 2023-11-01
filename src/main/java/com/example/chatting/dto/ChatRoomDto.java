@@ -21,16 +21,4 @@ public class ChatRoomDto {
         this.roomId = roomId;
         this.name = name;
     }
-
-    public void handleActions(WebSocketSession session, ChatMessageDto chatMessageDto, ChatService chatService) {
-        if (chatMessageDto.getType().equals(ChatMessageDto.MessageType.ENTER)) {
-            sessions.add(session);
-            chatMessageDto.setMessage(chatMessageDto.getSender() + "님이 입장했습니다.");
-        }
-        sendMessage(chatMessageDto, chatService);
-    }
-
-    public <T> void sendMessage(T message, ChatService chatService) {
-        sessions.parallelStream().forEach(session->chatService.sendMessage(session, message));
-    }
 }
